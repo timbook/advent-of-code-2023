@@ -24,6 +24,12 @@ class Map:
                 return x - (S - D)
         return x
 
+    def invert_pass(self, y):
+        for D, S, L in self.array:
+            if D <= y <= D + L - 1:
+                return y + (S - D)
+        return y
+
 class Almanac:
     def __init__(self, maps):
         self.maps = maps
@@ -35,12 +41,52 @@ class Almanac:
             x = m.pass_value(x)
         self.cache[input_] = x
 
+    def invert_pass(self, y):
+        output_ = y
+        for m in maps[::-1]:
+            y = m.invert_pass(y)
+        return y
+
 maps = [Map(d) for d in data[1:]]
 almanac = Almanac(maps)
 
-# Test
 for s in seeds:
     almanac.pass_through(s)
 
 sol = min(almanac.cache.values())
 print(f"A ::: {sol}")
+
+seed_pairs = [(seeds[i], seeds[i + 1]) for i in range(0, len(seeds), 2)]
+
+def is_from_seed(x):
+    for s, l in seed_pairs:
+        if s <= x <= s + l - 1:
+            return True
+    return False
+
+loc = 0
+# Get millions digit
+while True:
+    possible_seed = almanac.invert_pass(loc)
+    if is_from_seed(possible_seed):
+        break
+    loc += 1_000_000
+
+loc -= 1_000_000
+# Increment by 10K
+while True:
+    possible_seed = almanac.invert_pass(loc)
+    if is_from_seed(possible_seed):
+        break
+    loc += 10_000
+
+loc -= 10_000
+# Increment by 1
+while True:
+    possible_seed = almanac.invert_pass(loc)
+    if is_from_seed(possible_seed):
+        break
+    loc += 1
+    
+sol = loc
+print(f"B ::: {sol}")
