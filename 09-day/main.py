@@ -1,8 +1,6 @@
 import numpy as np
 from scipy.special import comb
-import pdb
 
-#  x = np.loadtxt('data/sample.txt', dtype=int, delimiter=' ')
 x = np.loadtxt('data/input.txt', dtype=int, delimiter=' ')
 R, C = x.shape
 
