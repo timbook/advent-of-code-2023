@@ -1,8 +1,6 @@
 import numpy as np
-import re
 
-raw = open('data/sample.txt').readlines()
-#  raw = open('data/input.txt').readlines()
+raw = open('data/input.txt').readlines()
 
 mx = np.array([list(line.strip()) for line in raw])
 
@@ -44,6 +42,12 @@ class Platform:
         self.tilt_west()
         self.grid = self.grid[:, ::-1]
 
+    def cycle(self):
+        self.tilt_north()
+        self.tilt_west()
+        self.tilt_south()
+        self.tilt_east()
+
     def get_score(self):
         R = self.grid.shape[0]
         score = 0
@@ -51,6 +55,11 @@ class Platform:
             n = np.sum(row == 'O')
             score += n*(R - i)
         self.score = score
+        return self.score
+
+    def show(self):
+        rows = [''.join(row) for row in self.grid]
+        print('\n'.join(rows))
 
 plat = Platform(mx)
 plat.tilt_north()
@@ -58,42 +67,19 @@ plat.get_score()
 sol = plat.score
 print(f"A ::: {sol}")
 
-# Roll the rocks NWSE, then score after 1_000_000_000 cycleso
+plat = Platform(mx)
+scores = []
+for i in range(500):
+    plat.cycle()
+    plat.get_score()
+    scores.append(plat.score)
 
-#  After 1 cycle:
-#  .....#....
-#  ....#...O#
-#  ...OO##...
-#  .OO#......
-#  .....OOO#.
-#  .O#...O#.#
-#  ....O#....
-#  ......OOOO
-#  #...O###..
-#  #..OO#....
+# Find cycle len
+last = scores[-1]
+cycle_len = scores[:-1][::-1].index(last) + 1
 
-#  After 2 cycles:
-#  .....#....
-#  ....#...O#
-#  .....##...
-#  ..O#......
-#  .....OOO#.
-#  .O#...O#.#
-#  ....O#...O
-#  .......OOO
-#  #..OO###..
-#  #.OOO#...O
+cycle = scores[-(cycle_len + 1):-1]
 
-#  After 3 cycles:
-#  .....#....
-#  ....#...O#
-#  .....##...
-#  ..O#......
-#  .....OOO#.
-#  .O#...O#.#
-#  ....O#...O
-#  .......OOO
-#  #...O###.O
-#  #.OOO#...O
-
-# Sample solution after 1B cycles = 64
+B = 1_000_000_000
+sol = cycle[(B - 500) % cycle_len]
+print(f"B ::: {sol}")
